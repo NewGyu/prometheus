@@ -1,3 +1,19 @@
-#!/bin/sh
+#cloud-config
 
-docker run --restart=always -v /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml -p 9090:9090 prom/prometheus
+coreos:
+  units:
+    - name: prometheus.service
+      command: start
+      content: |
+        [Unit]
+        Description= prometheus master console
+        After=docker.service
+        Requires=docker.service
+
+        [Service]
+        Restart=always
+        ExecStart=/usr/bin/docker run --name=prometheus --rm -v /etc/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml -p 9090:9090 prom/prometheus
+        ExecStop=/usr/bin/docker stop prometheus
+
+        [Install]
+        WantedBy=multi-user.target
